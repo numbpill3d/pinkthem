@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>digital soul ~ profile sanctuary</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ms+Gothic:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'MS Gothic', monospace;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 50%, #e1bee7 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        #threejs-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .main-interface {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+            padding-top: 3rem;
+        }
+        
+        .content-island {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 182, 193, 0.3);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 
+                0 8px 32px rgba(255, 182, 193, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .profile-header {
+            text-align: center;
+            color: #4a4a4a;
+            position: relative;
+        }
+        
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffb6c1, #ffc0cb, #dda0dd);
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 auto 1rem;
+            box-shadow: 0 6px 20px rgba(255, 182, 193, 0.4);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05) rotate(3deg);
+        }
+        
+        .status-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: #90ee90;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .profile-name {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 6px rgba(255, 182, 193, 0.4);
+        }
+        
+        .profile-title {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            opacity: 0.8;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-bio {
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            color: #555;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #d63384;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4a4a4a;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-icon {
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.8rem;
+        }
+        
+        .skill-tag {
+            background: rgba(255, 182, 193, 0.2);
+            border: 1px solid rgba(255, 182, 193, 0.3);
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #4a4a4a;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .skill-tag:hover {
+            background: rgba(255, 182, 193, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .project-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(255, 182, 193, 0.3);
+        }
+        
+        .project-title {
+            font-weight: 700;
+            color: #4a4a4a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .project-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+        
+        .project-tech {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .contact-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .contact-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 182, 193, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .contact-icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .visitor-counter {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 182, 193, 0.2);
+            margin-top: 1rem;
+        }
+        
+        .kawaii-decoration {
+            position: absolute;
+            pointer-events: none;
+            color: rgba(255, 182, 193, 0.6);
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+        
+        @media (max-width: 768px) {
+            .main-interface {
+                padding: 1rem;
+                padding-top: 2rem;
+            }
+            
+            .content-island {
+                padding: 1.5rem;
+            }
+            
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+                font-size: 48px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .skills-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .content-island {
+                padding: 1rem;
+            }
+            
+            .section {
+                padding: 1rem;
+            }
+        }
+        
+        /* Custom scrollbar */
+        body::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        body::-webkit-scrollbar-thumb {
+            background: rgba(255, 182, 193, 0.3);
+            border-radius: 6px;
+        }
+        
+        body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 182, 193, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="threejs-container"></div>
+    
+    <div class="main-interface">
+        <div class="content-island">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <span>^_^</span>
+                    <div class="status-badge"></div>
+                </div>
+                <h1 class="profile-name">digital dreamer</h1>
+                <div class="profile-title">~ pixel artist & code poet ~</div>
+                <div class="profile-bio">
+                    crafting digital experiences in the liminal spaces between nostalgia and innovation.<br>
+                    i collect vintage pixels, whisper to algorithms, and believe the web was more beautiful<br>
+                    when it was made with love instead of frameworks ♡
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="projects-count">12</span>
+                        <span class="stat-label">projects</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="coffee-count">∞</span>
+                        <span class="stat-label">coffee</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="pixel-count">2,847</span>
+                        <span class="stat-label">pixels pushed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="uptime-count">24/7</span>
+                        <span class="stat-label">uptime</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Skills Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">[*]</span>
+                    digital magic toolkit
+                </h2>
+                <div class="skills-grid">
+                    <div class="skill-tag" onclick="glowSkill(this)">HTML5 + CSS3</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">JavaScript ES6+</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Three.js</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">X3DOM</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">A-Frame VR</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Pixel Art</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Web Audio API</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Canvas 2D/3D</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Responsive Design</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Nostalgia</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Kawaii Aesthetics</div>
+                    <div class="skill-tag" onclick="glowSkill(this)">Digital Poetry</div>
+                </div>
+            </div>
+            
+            <!-- Projects Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">[+]</span>
+                    pixel garden showcase
+                </h2>
+                <div class="projects-grid">
+                    <div class="project-card" onclick="animateProject(this)">
+                        <div class="project-title">ethereal sanctuary</div>
+                        <div class="project-desc">
+                            a floating digital meditation space where consciousness meets algorithms
+                        </div>
+                        <div class="project-tech">three.js • glassmorphism • ascii souls</div>
+                    </div>
+                    <div class="project-card" onclick="animateProject(this)">
+                        <div class="project-title">neon dreams gallery</div>
+                        <div class="project-desc">
+                            interactive pixel art museum with synthwave soundscapes
+                        </div>
+                        <div class="project-tech">canvas • web audio • 80s magic</div>
+                    </div>
+                    <div class="project-card" onclick="animateProject(this)">
+                        <div class="project-title">virtual shrine builder</div>
+                        <div class="project-desc">
+                            nostalgic homepage creator inspired by geocities culture
+                        </div>
+                        <div class="project-tech">vanilla js • retro css • pure love</div>
+                    </div>
+                    <div class="project-card" onclick="animateProject(this)">
+                        <div class="project-title">ascii poetry engine</div>
+                        <div class="project-desc">
+                            generates procedural text art from emotional input algorithms
+                        </div>
+                        <div class="project-tech">javascript • unicode • digital feelings</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Currently Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">[~]</span>
+                    currently vibing
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="color: #666; line-height: 1.6;">
+                        <strong>reading:</strong> "Snow Crash" by Neal Stephenson<br>
+                        <strong>listening:</strong> lo-fi hip hop + rain sounds<br>
+                        <strong>learning:</strong> WebGL shaders & GLSL poetry<br>
+                        <strong>mood:</strong> <span id="current-mood">contemplative</span>
+                    </div>
+                    <div style="color: #666; line-height: 1.6;">
+                        <strong>weather:</strong> <span id="weather-status">digital sunshine</span><br>
+                        <strong>location:</strong> cyberspace sector 7<br>
+                        <strong>status:</strong> building tomorrow's nostalgia<br>
+                        <strong>energy:</strong> <span id="energy-level">85%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">[o]</span>
+                    digital communication portals
+                </h2>
+                <div class="contact-links">
+                    <div class="contact-item" onclick="contactBounce(this)">
+                        <span class="contact-icon">@</span>
+                        <div>email shrine</div>
+                        <small>hello@digitaldreamer.pixel</small>
+                    </div>
+                    <div class="contact-item" onclick="contactBounce(this)">
+                        <span class="contact-icon">#</span>
+                        <div>code repository</div>
+                        <small>github.com/pixelpoet</small>
+                    </div>
+                    <div class="contact-item" onclick="contactBounce(this)">
+                        <span class="contact-icon">*</span>
+                        <div>social nexus</div>
+                        <small>@kawaii_coder</small>
+                    </div>
+                    <div class="contact-item" onclick="contactBounce(this)">
+                        <span class="contact-icon">~</span>
+                        <div>digital garden</div>
+                        <small>blog.digitaldreamer.pixel</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visitor Counter -->
+            <div class="visitor-counter">
+                <div>you are visitor number <strong id="visitor-count">001,337</strong></div>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem;">
+                    last updated: <span id="last-updated">2025.07.13 @ 14:42:00 JST</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating decorations -->
+    <div class="kawaii-decoration" style="top: 15%; left: 10%; animation-delay: 0s;">☆</div>
+    <div class="kawaii-decoration" style="top: 25%; right: 15%; animation-delay: 1s;">♡</div>
+    <div class="kawaii-decoration" style="top: 45%; left: 5%; animation-delay: 2s;">✧</div>
+    <div class="kawaii-decoration" style="top: 65%; right: 10%; animation-delay: 3s;">◇</div>
+    <div class="kawaii-decoration" style="bottom: 20%; left: 15%; animation-delay: 4s;">※</div>
+
+    <script>
+        // Three.js Background Setup
+        let scene, camera, renderer, particles, particleSystem;
+        let mouseX = 0, mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+        
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            document.getElementById('threejs-container').appendChild(renderer.domElement);
+            
+            // Create kawaii particle system
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const colors = [];
+            const sizes = [];
+            
+            for (let i = 0; i < 150; i++) {
+                vertices.push(
+                    (Math.random() - 0.5) * 1200,
+                    (Math.random() - 0.5) * 1200,
+                    (Math.random() - 0.5) * 1200
+                );
+                
+                // Kawaii pink palette
+                const color = new THREE.Color();
+                const hue = 0.85 + Math.random() * 0.15; // Pink to purple range
+                color.setHSL(hue, 0.4 + Math.random() * 0.3, 0.7 + Math.random() * 0.3);
+                colors.push(color.r, color.g, color.b);
+                
+                sizes.push(Math.random() * 4 + 1);
+            }
+            
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+            
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending
+            });
+            
+            particleSystem = new THREE.Points(geometry, material);
+            scene.add(particleSystem);
+            
+            camera.position.z = 500;
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Gentle rotation
+            particleSystem.rotation.x += 0.0003;
+            particleSystem.rotation.y += 0.0005;
+            
+            // Mouse interaction
+            camera.position.x += (mouseX - camera.position.x) * 0.01;
+            camera.position.y += (-mouseY - camera.position.y) * 0.01;
+            camera.lookAt(scene.position);
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Interactive Functions
+        function glowSkill(element) {
+            element.style.background = 'rgba(255, 182, 193, 0.6)';
+            element.style.transform = 'scale(1.1) rotate(2deg)';
+            element.style.boxShadow = '0 0 20px rgba(255, 182, 193, 0.8)';
+            
+            setTimeout(() => {
+                element.style.background = 'rgba(255, 182, 193, 0.2)';
+                element.style.transform = 'scale(1)';
+                element.style.boxShadow = 'none';
+            }, 300);
+        }
+        
+        function animateProject(element) {
+            element.style.transform = 'translateY(-5px) scale(1.02)';
+            element.style.boxShadow = '0 8px 24px rgba(255, 182, 193, 0.5)';
+            
+            setTimeout(() => {
+                element.style.transform = 'translateY(0px) scale(1)';
+                element.style.boxShadow = '0 6px 16px rgba(255, 182, 193, 0.3)';
+            }, 200);
+        }
+        
+        function contactBounce(element) {
+            element.style.transform = 'translateY(-3px) scale(1.05)';
+            element.style.background = 'rgba(255, 255, 255, 0.3)';
+            
+            setTimeout(() => {
+                element.style.transform = 'translateY(0px) scale(1)';
+                element.style.background = 'rgba(255, 255, 255, 0.1)';
+            }, 200);
+        }
+        
+        // Dynamic content updates
+        function updateLiveStats() {
+            const moods = ['contemplative', 'kawaii', 'inspired', 'dreamy', 'focused', 'nostalgic'];
+            const weather = ['digital sunshine', 'pixel rain', 'algorithmic clouds', 'binary snow', 'data storms'];
+            
+            document.getElementById('current-mood').textContent = 
+                moods[Math.floor(Math.random() * moods.length)];
+            document.getElementById('weather-status').textContent = 
+                weather[Math.floor(Math.random() * weather.length)];
+            document.getElementById('energy-level').textContent = 
+                Math.floor(Math.random() * 30 + 70) + '%';
+        }
+        
+        // Visitor counter animation
+        function animateVisitorCounter() {
+            const counter = document.getElementById('visitor-count');
+            let currentCount = parseInt(counter.textContent.replace(/,/g, ''));
+            currentCount++;
+            counter.textContent = currentCount.toLocaleString().padStart(7, '0');
+        }
+        
+        // Mouse tracking
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX) * 0.3;
+            mouseY = (event.clientY - windowHalfY) * 0.3;
+        });
+        
+        // Window resize
+        window.addEventListener('resize', () => {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Kawaii easter eggs
+        let clickCount = 0;
+        document.querySelector('.profile-avatar').addEventListener('click', () => {
+            clickCount++;
+            const avatar = document.querySelector('.profile-avatar span');
+            const expressions = ['^_^', '(◕‿◕)', '(´∀`)', '(＾◡＾)', 'ヽ(°〇°)ﾉ', '(￣▽￣)', '(◔‿◔)'];
+            avatar.textContent = expressions[clickCount % expressions.length];
+            
+            // Special effect at 7 clicks
+            if (clickCount === 7) {
+                document.body.style.background = 'linear-gradient(135deg, #ff69b4 0%, #ff1493 50%, #da70d6 100%)';
+                setTimeout(() => {
+                    document.body.style.background = 'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 50%, #e1bee7 100%)';
+                }, 2000);
+            }
+        });
+        
+        // Initialize everything
+        window.addEventListener('load', () => {
+            initThreeJS();
+            updateLiveStats();
+            
+            // Update stats every 30 seconds
+            setInterval(updateLiveStats, 30000);
+            
+            // Update visitor counter every 3 minutes
+            setInterval(animateVisitorCounter, 180000);
+            
+            // Update timestamp
+            const now = new Date();
+            const timestamp = now.getFullYear() + '.' + 
+                            String(now.getMonth() + 1).padStart(2, '0') + '.' + 
+                            String(now.getDate()).padStart(2, '0') + ' @ ' +
+                            String(now.getHours()).padStart(2, '0') + ':' +
+                            String(now.getMinutes()).padStart(2, '0') + ':' +
+                            String(now.getSeconds()).padStart(2, '0') + ' JST';
+            document.getElementById('last-updated').textContent = timestamp;
+        });
+    </script>
+</body>
+</html>
